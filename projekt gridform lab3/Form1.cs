@@ -1,6 +1,9 @@
 using Microsoft.VisualBasic.Devices;
 using System;
+using System.Reflection.Metadata;
 using System.Windows.Forms;
+using System.Data;
+
 namespace projekt_gridform_lab3
 
 {
@@ -33,28 +36,90 @@ namespace projekt_gridform_lab3
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void ExportToCSV(DataGridView dataGridView, string filePath)
         {
+            string csvContent = "Imie,Nazwisko,Wiek,Stanowisko" + Environment.NewLine;
+            foreach(DataGridViewRow row in dataGridView1.Rows)
+            {
+                if(!row.IsNewRow)
+                {
 
+                    csvContent += string.Join(",",Array.ConvertAll(row.Cells.Cast<DataGridViewCell>().ToArray(), c=>c.Value)) + Environment.NewLine;
+                }
+            }
+            try
+            {
+                File.WriteAllText(filePath, csvContent);
+                MessageBox.Show("Plik zapisano pomyœlnie.", "Sukces", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Wyst¹pi³ b³¹d podczas zapisywania pliku: " + ex.Message, "B³¹d", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)//zapis do csv
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Pliki CSV (*.csv)|*.csv|Wszystkie pliki(*.*)|*.*";
+            saveFileDialog.Title = "wybierz lokalizacje";
+            saveFileDialog.ShowDialog();
+            if (saveFileDialog.FileName != " ")
+            {
+                ExportToCSV(dataGridView1, saveFileDialog.FileName);
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+           
+
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "Pliki CSV (*.csv)|*.csv|Wszystkie pliki (*.*)|*.*";
+            openFileDialog1.Title = "Wybierz plik do wczytania";
+            openFileDialog1.ShowDialog();
+            if (openFileDialog1.FileName != " ")
+            {
+                LoadCSVToDataGridView(openFileDialog1.FileName);
+            }
 
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count > 0)
+           foreach(DataGridViewRow row in dataGridView1.SelectedRows)
             {
-
-                DataGridViewRow selectedRow = dataGridView1.SelectedRows[0];
-
-                
-                dataGridView1.Rows.Remove(selectedRow);
+                dataGridView1.Rows.RemoveAt(row.Index);
             }
+           
         }
+        private void LoadCSVToDataGridView(string filePath)
+        {
+            if(!File.Exists(filePath))
+            {
+                MessageBox.Show("Plik nie istnieje.", "B³¹d", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
 
+            }
+
+
+            string[] lines = File.ReadAllLines(filePath);
+            DataTable dataTable = new DataTable();
+            string[] naglowki = lines[0].Split(",");
+            foreach( string naglowek in naglowki )
+            {
+                dataTable.Columns.Add(naglowek);
+            }
+
+            for(int i = 0; i < naglowki.Length; i++)
+            {
+                string[] values = lines[i].Split('.');
+                dataTable.Rows.Add(values);
+            }
+
+            dataGridView1.DataSource = dataTable;
+
+        }
         private void button4_Click(object sender, EventArgs e)
 
         {

@@ -15,6 +15,7 @@ namespace projekt_gridform_lab3
     {
         public int id = 0;
         private Form1 form2;
+        public Osoba osoba1;
         public Form2(Form1 form2)
         {
             InitializeComponent();
@@ -36,11 +37,16 @@ namespace projekt_gridform_lab3
             string name = textBox1.Text;
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        public void button2_Click(object sender, EventArgs e)
         {
             
             form2.dataGridView1.Rows.Add(new object[] {id, textBox1.Text, textBox2.Text, textBox3.Text, comboBox1.Text});
-
+            string Imie = textBox1.Text;
+            string Nazwisko = textBox2.Text;
+            string Stanowisko = comboBox1.Text;
+            int ID = id;
+            string Wiek = textBox3.Text;
+            osoba1 = new Osoba(Imie, Nazwisko, Stanowisko, Wiek, ID);
             id++;
             form2.dataGridView1.Show();
             
